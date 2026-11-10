@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AeroPress Timer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e9eff0; --surface:#f7fafa; --ink:#16262d; --muted:#5b6f77; --line:#c9d6d9;
+  --steep:#1f6f78; --swirl:#7a5cc4; --press:#c8742a; --done:#2f8a4f;
+  --head:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#0f1a1f;--surface:#18272e;--ink:#e6eff1;--muted:#93a8b0;--line:#2b3f48;--steep:#4fb6c1;--swirl:#a58cf0;--press:#f0a05a;--done:#5fc785}
+}
+:root[data-theme="dark"]{--bg:#0f1a1f;--surface:#18272e;--ink:#e6eff1;--muted:#93a8b0;--line:#2b3f48;--steep:#4fb6c1;--swirl:#a58cf0;--press:#f0a05a;--done:#5fc785}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--body);-webkit-text-size-adjust:100%}
+main{max-width:560px;margin:0 auto;padding:20px 16px 40px;display:grid;gap:16px}
+h1{font:800 28px/1.1 var(--head);margin:6px 0 0;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:2px 0 0}
+section{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px}
+h2{font:700 18px/1.2 var(--head);margin:0 0 12px}
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
+.field{display:flex;align-items:baseline;gap:6px;border:1.5px solid var(--line);border-radius:12px;padding:6px 12px;background:var(--bg)}
+.field:focus-within{border-color:var(--steep)}
+.field input{width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:700 30px/1.2 var(--head);outline:none;padding:0}
+.field span{font-weight:500;color:var(--muted)}
+.ratio{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+.ratio b{color:var(--ink);font-family:var(--head);font-size:16px}
+button{font:500 15px var(--body);cursor:pointer;color:var(--ink);background:transparent;border:1.5px solid var(--line);border-radius:999px;padding:9px 16px;min-height:44px}
+button:focus-visible,.field input:focus-visible{outline:3px solid var(--steep);outline-offset:2px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chips button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.temp{margin:10px 0 0;color:var(--muted);font-size:14px}
+.temp b{color:var(--ink)}
+.timer{text-align:center}
+.dial{position:relative;width:min(300px,78vw);aspect-ratio:1;margin:4px auto 8px}
+.dial svg{width:100%;height:100%;transform:rotate(-90deg)}
+.track{fill:none;stroke:var(--line);stroke-width:10}
+.prog{fill:none;stroke:var(--phase,var(--steep));stroke-width:10;stroke-linecap:round;transition:stroke .3s}
+.tick{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.time{font:800 64px/1 var(--head);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.phase{font:700 18px var(--head);color:var(--phase,var(--steep));margin-top:4px}
+.cue{min-height:3em;margin:8px auto 14px;max-width:34ch;font-size:17px}
+.ctrl{display:flex;gap:10px;justify-content:center}
+.ctrl .go{background:var(--phase,var(--steep));border-color:transparent;color:#fff;font:700 18px var(--head);padding:12px 34px;min-width:150px}
+:root[data-theme="dark"] .go,:root:not([data-theme="light"]) .go{color:#07161a}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .go{color:#fff}}
+ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+li{display:grid;grid-template-columns:54px 1fr;gap:12px;padding:12px;border:1.5px solid var(--line);border-radius:14px}
+li .t{font:700 17px var(--head);font-variant-numeric:tabular-nums}
+li p{margin:2px 0 0;color:var(--muted);font-size:15px}
+li strong{font-family:var(--head)}
+li.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,transparent)}
+li.on .t{color:var(--c)}
+li.past{opacity:.55}
+.prep{margin:0;padding-left:20px;color:var(--muted);font-size:15px}
+.prep li{display:list-item;border:0;padding:2px 0;grid-template-columns:none}
+@media (prefers-reduced-motion:reduce){.prog{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>AeroPress timer</h1>
+    <p class="sub">Standard position, 3:20 total. Set your dose and the recipe scales with it.</p>
+  </header>
+
+  <section aria-labelledby="calc-h">
+    <h2 id="calc-h">Amounts</h2>
+    <div class="calc">
+      <div><label for="coffee">Coffee</label><div class="field"><input id="coffee" type="number" inputmode="decimal" step="0.1" min="1" value="11"><span>g</span></div></div>
+      <div><label for="water">Water</label><div class="field"><input id="water" type="number" inputmode="decimal" step="1" min="10" value="200"><span>g</span></div></div>
+      <div class="ratio"><span>Ratio <b id="ratio">1 : 18.2</b></span><button id="reset" type="button">Reset to 11 g / 200 g</button></div>
+    </div>
+    <div class="chips" role="group" aria-label="Roast level">
+      <button type="button" data-t="99°C" data-n="Boiling water works best for light roasts." aria-pressed="true">Light</button>
+      <button type="button" data-t="90–95°C" data-n="Lower the temperature a little for medium roasts." aria-pressed="false">Medium</button>
+      <button type="button" data-t="85–90°C" data-n="Cooler water keeps dark roasts from tasting harsh." aria-pressed="false">Dark</button>
+    </div>
+    <p class="temp"><b id="temp">99°C</b> <span id="tempnote">Boiling water works best for light roasts.</span></p>
+  </section>
+
+  <section class="timer" aria-labelledby="timer-h">
+    <h2 id="timer-h" class="sr" style="position:absolute;left:-9999px">Timer</h2>
+    <div class="dial" id="dial">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="track" cx="100" cy="100" r="90"/>
+        <circle class="prog" id="prog" cx="100" cy="100" r="90" stroke-dasharray="565.49" stroke-dashoffset="565.49"/>
+        <g id="ticks"></g>
+      </svg>
+      <div class="center">
+        <div class="time" id="time" role="timer" aria-live="off">0:00</div>
+        <div class="phase" id="phase">Ready</div>
+      </div>
+    </div>
+    <p class="cue" id="cue" aria-live="polite">Add the coffee, then start the timer as you begin to pour.</p>
+    <div class="ctrl">
+      <button class="go" id="go" type="button">Start</button>
+      <button id="stop" type="button">Reset</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="steps-h">
+    <h2 id="steps-h">Before you start</h2>
+    <ul class="prep">
+      <li>Put a paper filter in the cap and attach it. No rinse or preheat needed.</li>
+      <li>Add <b class="cg">11</b> g of coffee, ground fine to medium (like table salt), and level it.</li>
+    </ul>
+    <h2 style="margin-top:18px">Brew</h2>
+    <ol id="steps"></ol>
+  </section>
+</main>
+
+<script>
+(function(){
+  var RC=11, RW=200, TOTAL=200;
+  var PH=[
+    {n:"Steep", s:0, e:120, c:"var(--steep)", cc:"--steep", t:function(w){return "Pour all "+w+" g of water quickly so every ground is wet. Set the plunger in about 1 cm to stop dripping, then leave it alone.";}},
+    {n:"Swirl and settle", s:120, e:150, c:"var(--swirl)", cc:"--swirl", t:function(){return "Gently swirl the whole brewer to break up the crust, then let it settle.";}},
+    {n:"Press", s:150, e:200, c:"var(--press)", cc:"--press", t:function(){return "Press down smoothly for about 30 seconds, right through the hiss.";}}
+  ];
+  var $=function(id){return document.getElementById(id)};
+  var coffee=$("coffee"), water=$("water"), ratio=$("ratio");
+  var go=$("go"), dial=$("dial"), prog=$("prog"), timeEl=$("time"), phaseEl=$("phase"), cue=$("cue");
+  var C=2*Math.PI*90;
+
+  function fmt(s){s=Math.max(0,Math.floor(s));return Math.floor(s/60)+":"+("0"+(s%60)).slice(-2)}
+  function r1(x){return Math.round(x*10)/10}
+
+  /* ---- calculator ---- */
+  var lastGood={c:RC,w:RW};
+  function showRatio(){
+    var c=parseFloat(coffee.value), w=parseFloat(water.value);
+    if(c>0&&w>0){ratio.textContent="1 : "+(Math.round(w/c*10)/10);lastGood={c:c,w:w};}
+    renderSteps();
+  }
+  coffee.addEventListener("input",function(){
+    var c=parseFloat(coffee.value);
+    if(c>0){water.value=Math.round(c*RW/RC);}
+    showRatio();
+  });
+  water.addEventListener("input",function(){
+    var w=parseFloat(water.value);
+    if(w>0){coffee.value=r1(w*RC/RW);}
+    showRatio();
+  });
+  $("reset").addEventListener("click",function(){coffee.value=RC;water.value=RW;showRatio();});
+
+  var chips=document.querySelectorAll(".chips button");
+  chips.forEach(function(b){b.addEventListener("click",function(){
+    chips.forEach(function(x){x.setAttribute("aria-pressed","false")});
+    b.setAttribute("aria-pressed","true");
+    $("temp").textContent=b.dataset.t; $("tempnote").textContent=b.dataset.n;
+  });});
+
+  /* ---- steps list ---- */
+  function renderSteps(){
+    var w=Math.round(lastGood.w), c=r1(lastGood.c);
+    document.querySelectorAll(".cg").forEach(function(e){e.textContent=c});
+    var h="";
+    PH.forEach(function(p,i){
+      h+='<li id="s'+i+'" style="--c:var('+p.cc+')"><span class="t">'+fmt(p.s)+'</span><div><strong>'+p.n+'</strong><p>'+p.t(w)+'</p></div></li>';
+    });
+    h+='<li id="s3" style="--c:var(--done)"><span class="t">'+fmt(TOTAL)+'</span><div><strong>Done</strong><p>Pour into a cup and enjoy.</p></div></li>';
+    $("steps").innerHTML=h;
+    mark(lastPhase);
+  }
+
+  /* ---- ticks on dial (swirl at 2:00, press at 2:30) ---- */
+  (function(){
+    var g=$("ticks"), out="";
+    [120,150].forEach(function(s){
+      var a=s/TOTAL*2*Math.PI, x1=100+80*Math.cos(a), y1=100+80*Math.sin(a), x2=100+100*Math.cos(a), y2=100+100*Math.sin(a);
+      out+='<line class="tick" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>';
+    });
+    g.innerHTML=out;
+  })();
+
+  /* ---- timer ---- */
+  var running=false, elapsed=0, t0=0, iv=null, lastPhase=-1, audio=null, wake=null;
+
+  function beep(f,d){
+    try{
+      if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();
+      var o=audio.createOscillator(), g=audio.createGain();
+      o.frequency.value=f;o.connect(g);g.connect(audio.destination);
+      g.gain.setValueAtTime(.0001,audio.currentTime);
+      g.gain.exponentialRampToValueAtTime(.25,audio.currentTime+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+d);
+      o.start();o.stop(audio.currentTime+d+.05);
+    }catch(e){}
+    try{if(navigator.vibrate)navigator.vibrate(d>.3?[200,80,200]:120);}catch(e){}
+  }
+
+  function mark(i){
+    for(var k=0;k<4;k++){
+      var el=$("s"+k); if(!el)continue;
+      el.classList.toggle("on",k===i);
+      el.classList.toggle("past",i>=0&&k<i);
+    }
+  }
+
+  function phaseIndex(t){
+    if(t>=TOTAL)return 3;
+    for(var i=0;i<PH.length;i++){if(t<PH[i].e)return i;}
+    return 3;
+  }
+
+  function paint(){
+    var t=Math.min(elapsed,TOTAL), i=phaseIndex(t);
+    timeEl.textContent=fmt(t);
+    prog.style.strokeDashoffset=C*(1-t/TOTAL);
+    var col=i===3?"var(--done)":PH[i].c;
+    dial.style.setProperty("--phase",col); go.style.setProperty("--phase",col);
+    if(i!==lastPhase){
+      var first=lastPhase===-1;
+      lastPhase=i; mark(i);
+      if(i===3){phaseEl.textContent="Done";cue.textContent="Time’s up. Remove the brewer and pour.";}
+      else{phaseEl.textContent=PH[i].n;cue.textContent=PH[i].t(Math.round(lastGood.w));}
+      if(running&&!first)beep(i===3?880:660,i===3?.5:.25);
+    }
+  }
+
+  function tick(){
+    elapsed=(performance.now()-t0)/1000;
+    if(elapsed>=TOTAL){elapsed=TOTAL;paint();finish();return;}
+    paint();
+  }
+
+  function setLock(on){
+    try{
+      if(on&&navigator.wakeLock){navigator.wakeLock.request("screen").then(function(l){wake=l}).catch(function(){});}
+      else if(!on&&wake){wake.release();wake=null;}
+    }catch(e){}
+  }
+
+  function start(){
+    running=true; t0=performance.now()-elapsed*1000;
+    go.textContent="Pause"; coffee.disabled=water.disabled=true;
+    beep(660,.15); setLock(true);
+    lastPhase=-2; iv=setInterval(tick,100); tick();
+  }
+  function pause(){
+    running=false; clearInterval(iv); go.textContent="Resume"; setLock(false);
+  }
+  function finish(){
+    running=false; clearInterval(iv); go.textContent="Brew again"; setLock(false);
+    coffee.disabled=water.disabled=false;
+  }
+  function reset(){
+    running=false; clearInterval(iv); elapsed=0; lastPhase=-1; setLock(false);
+    coffee.disabled=water.disabled=false;
+    go.textContent="Start"; timeEl.textContent="0:00"; phaseEl.textContent="Ready";
+    prog.style.strokeDashoffset=C; dial.style.removeProperty("--phase"); go.style.removeProperty("--phase");
+    cue.textContent="Add the coffee, then start the timer as you begin to pour.";
+    mark(-1);
+  }
+
+  go.addEventListener("click",function(){
+    if(running)pause();
+    else if(elapsed>=TOTAL){reset();start();}
+    else start();
+  });
+  $("stop").addEventListener("click",reset);
+  document.addEventListener("visibilitychange",function(){if(running&&!document.hidden){setLock(true);tick();}});
+
+  showRatio();
+})();
+</script>
+</body>
+</html>
