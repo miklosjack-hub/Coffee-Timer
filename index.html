@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#e9eff0; --surface:#f7fafa; --ink:#16262d; --muted:#5b6f77; --line:#c9d6d9;
+  --bg:#e9eff0; --surface:#f7fafa; --ink:#16262d; --muted:#5b6f77; --line:#c9d6d9; --btn:#fff;
   --steep:#1f6f78; --swirl:#7a5cc4; --press:#c8742a; --done:#2f8a4f;
   --head:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
   --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
@@ -16,9 +16,9 @@
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){--bg:#0f1a1f;--surface:#18272e;--ink:#e6eff1;--muted:#93a8b0;--line:#2b3f48;--steep:#4fb6c1;--swirl:#a58cf0;--press:#f0a05a;--done:#5fc785}
+  :root:not([data-theme="light"]){--bg:#0f1a1f;--surface:#18272e;--ink:#e6eff1;--muted:#93a8b0;--line:#2b3f48;--btn:#07161a;--steep:#4fb6c1;--swirl:#a58cf0;--press:#f0a05a;--done:#5fc785}
 }
-:root[data-theme="dark"]{--bg:#0f1a1f;--surface:#18272e;--ink:#e6eff1;--muted:#93a8b0;--line:#2b3f48;--steep:#4fb6c1;--swirl:#a58cf0;--press:#f0a05a;--done:#5fc785}
+:root[data-theme="dark"]{--bg:#0f1a1f;--surface:#18272e;--ink:#e6eff1;--muted:#93a8b0;--line:#2b3f48;--btn:#07161a;--steep:#4fb6c1;--swirl:#a58cf0;--press:#f0a05a;--done:#5fc785}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--body);-webkit-text-size-adjust:100%}
@@ -27,15 +27,22 @@ h1{font:800 28px/1.1 var(--head);margin:6px 0 0;letter-spacing:-.01em}
 .sub{color:var(--muted);margin:2px 0 0}
 section{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px}
 h2{font:700 18px/1.2 var(--head);margin:0 0 12px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;border:1.5px solid var(--line);border-radius:999px;margin-bottom:16px;background:var(--bg)}
+.modes button{border:0;border-radius:999px}
+.modes button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
 .calc{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.calc.iced{grid-template-columns:repeat(3,1fr)}
+.calc.iced .field input{font-size:26px}
 label{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
 .field{display:flex;align-items:baseline;gap:6px;border:1.5px solid var(--line);border-radius:12px;padding:6px 12px;background:var(--bg)}
 .field:focus-within{border-color:var(--steep)}
 .field input{width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:700 30px/1.2 var(--head);outline:none;padding:0}
+.field input[readonly]{color:var(--muted)}
 .field span{font-weight:500;color:var(--muted)}
 .ratio{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:14px}
 .ratio b{color:var(--ink);font-family:var(--head);font-size:16px}
 button{font:500 15px var(--body);cursor:pointer;color:var(--ink);background:transparent;border:1.5px solid var(--line);border-radius:999px;padding:9px 16px;min-height:44px}
+button:disabled{opacity:.5;cursor:not-allowed}
 button:focus-visible,.field input:focus-visible{outline:3px solid var(--steep);outline-offset:2px}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .chips button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
@@ -50,11 +57,9 @@ button:focus-visible,.field input:focus-visible{outline:3px solid var(--steep);o
 .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .time{font:800 64px/1 var(--head);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .phase{font:700 18px var(--head);color:var(--phase,var(--steep));margin-top:4px}
-.cue{min-height:3em;margin:8px auto 14px;max-width:34ch;font-size:17px}
+.cue{min-height:4.5em;margin:8px auto 14px;max-width:34ch;font-size:17px}
 .ctrl{display:flex;gap:10px;justify-content:center}
-.ctrl .go{background:var(--phase,var(--steep));border-color:transparent;color:#fff;font:700 18px var(--head);padding:12px 34px;min-width:150px}
-:root[data-theme="dark"] .go,:root:not([data-theme="light"]) .go{color:#07161a}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .go{color:#fff}}
+.ctrl .go{background:var(--phase,var(--steep));border-color:transparent;color:var(--btn);font:700 18px var(--head);padding:12px 34px;min-width:150px}
 ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 li{display:grid;grid-template-columns:54px 1fr;gap:12px;padding:12px;border:1.5px solid var(--line);border-radius:14px}
 li .t{font:700 17px var(--head);font-variant-numeric:tabular-nums}
@@ -72,26 +77,31 @@ li.past{opacity:.55}
 <main>
   <header>
     <h1>AeroPress timer</h1>
-    <p class="sub">Standard position, 3:20 total. Set your dose and the recipe scales with it.</p>
+    <p class="sub">Standard position. Set your dose and the recipe scales with it.</p>
   </header>
 
   <section aria-labelledby="calc-h">
     <h2 id="calc-h">Amounts</h2>
-    <div class="calc">
-      <div><label for="coffee">Coffee</label><div class="field"><input id="coffee" type="number" inputmode="decimal" step="0.1" min="1" value="11"><span>g</span></div></div>
-      <div><label for="water">Water</label><div class="field"><input id="water" type="number" inputmode="decimal" step="1" min="10" value="200"><span>g</span></div></div>
-      <div class="ratio"><span>Ratio <b id="ratio">1 : 18.2</b></span><button id="reset" type="button">Reset to 11 g / 200 g</button></div>
+    <div class="modes" role="group" aria-label="Brew mode">
+      <button type="button" id="m-hot" aria-pressed="true">Hot</button>
+      <button type="button" id="m-iced" aria-pressed="false">Iced</button>
+    </div>
+    <div class="calc" id="calc">
+      <div><label for="coffee">Coffee</label><div class="field"><input id="coffee" type="number" inputmode="decimal" step="0.1" min="1" value="15"><span>g</span></div></div>
+      <div><label for="water">Water</label><div class="field"><input id="water" type="number" inputmode="decimal" step="1" min="10" value="273"><span>g</span></div></div>
+      <div id="icebox" hidden><label for="ice">Ice</label><div class="field"><input id="ice" type="number" readonly tabindex="-1" value="0"><span>g</span></div></div>
+      <div class="ratio"><span id="ratio"></span><button id="reset" type="button">Reset</button></div>
     </div>
     <div class="chips" role="group" aria-label="Roast level">
-      <button type="button" data-t="99°C" data-n="Boiling water works best for light roasts." aria-pressed="true">Light</button>
-      <button type="button" data-t="90–95°C" data-n="Lower the temperature a little for medium roasts." aria-pressed="false">Medium</button>
-      <button type="button" data-t="85–90°C" data-n="Cooler water keeps dark roasts from tasting harsh." aria-pressed="false">Dark</button>
+      <button type="button" data-t="210°F" data-n="Boiling water works best for light roasts." aria-pressed="true">Light</button>
+      <button type="button" data-t="194–203°F" data-n="Lower the temperature a little for medium roasts." aria-pressed="false">Medium</button>
+      <button type="button" data-t="185–194°F" data-n="Cooler water keeps dark roasts from tasting harsh." aria-pressed="false">Dark</button>
     </div>
-    <p class="temp"><b id="temp">99°C</b> <span id="tempnote">Boiling water works best for light roasts.</span></p>
+    <p class="temp"><b id="temp">210°F</b> <span id="tempnote">Boiling water works best for light roasts.</span></p>
   </section>
 
   <section class="timer" aria-labelledby="timer-h">
-    <h2 id="timer-h" class="sr" style="position:absolute;left:-9999px">Timer</h2>
+    <h2 id="timer-h" style="position:absolute;left:-9999px">Timer</h2>
     <div class="dial" id="dial">
       <svg viewBox="0 0 200 200" aria-hidden="true">
         <circle class="track" cx="100" cy="100" r="90"/>
@@ -103,7 +113,7 @@ li.past{opacity:.55}
         <div class="phase" id="phase">Ready</div>
       </div>
     </div>
-    <p class="cue" id="cue" aria-live="polite">Add the coffee, then start the timer as you begin to pour.</p>
+    <p class="cue" id="cue" aria-live="polite"></p>
     <div class="ctrl">
       <button class="go" id="go" type="button">Start</button>
       <button id="stop" type="button">Reset</button>
@@ -112,10 +122,7 @@ li.past{opacity:.55}
 
   <section aria-labelledby="steps-h">
     <h2 id="steps-h">Before you start</h2>
-    <ul class="prep">
-      <li>Put a paper filter in the cap and attach it. No rinse or preheat needed.</li>
-      <li>Add <b class="cg">11</b> g of coffee, ground fine to medium (like table salt), and level it.</li>
-    </ul>
+    <ul class="prep" id="prep"></ul>
     <h2 style="margin-top:18px">Brew</h2>
     <ol id="steps"></ol>
   </section>
@@ -123,38 +130,74 @@ li.past{opacity:.55}
 
 <script>
 (function(){
-  var RC=11, RW=200, TOTAL=200;
-  var PH=[
-    {n:"Steep", s:0, e:120, c:"var(--steep)", cc:"--steep", t:function(w){return "Pour all "+w+" g of water quickly so every ground is wet. Set the plunger in about 1 cm to stop dripping, then leave it alone.";}},
-    {n:"Swirl and settle", s:120, e:150, c:"var(--swirl)", cc:"--swirl", t:function(){return "Gently swirl the whole brewer to break up the crust, then let it settle.";}},
-    {n:"Press", s:150, e:200, c:"var(--press)", cc:"--press", t:function(){return "Press down smoothly for about 30 seconds, right through the hiss.";}}
-  ];
   var $=function(id){return document.getElementById(id)};
-  var coffee=$("coffee"), water=$("water"), ratio=$("ratio");
+  var M={
+    hot:{rc:15, kw:200/11, swirl:120, press:150, total:180},
+    iced:{rc:18, kw:240/22, swirl:240, press:270, total:300, ice:2/3}
+  };
+  var mode="hot";
+  var coffee=$("coffee"), water=$("water"), ice=$("ice");
   var go=$("go"), dial=$("dial"), prog=$("prog"), timeEl=$("time"), phaseEl=$("phase"), cue=$("cue");
   var C=2*Math.PI*90;
 
   function fmt(s){s=Math.max(0,Math.floor(s));return Math.floor(s/60)+":"+("0"+(s%60)).slice(-2)}
   function r1(x){return Math.round(x*10)/10}
+  function cfg(){return M[mode]}
+  function defWater(c){return Math.round(c*cfg().kw)}
+
+  /* phases for the current mode */
+  function phases(){
+    var m=cfg(), w=Math.round(lastGood.w);
+    return [
+      {n:"Steep", s:0, e:m.swirl, cc:"--steep",
+       t:mode==="hot"
+        ? "Pour all "+w+" g of water quickly so every ground is wet. Set the plunger in about 1 cm to stop dripping, then leave it alone."
+        : "Pour "+w+" g of water straight off the boil, wetting all the coffee. Set the plunger in a few mm, then wait."},
+      {n:"Swirl and settle", s:m.swirl, e:m.press, cc:"--swirl",
+       t:"Holding the brewer and plunger together, gently swirl, then wait 30 seconds."},
+      {n:"Press", s:m.press, e:m.total, cc:"--press",
+       t:"Press gently all the way, about 30 seconds."}
+    ];
+  }
+  function doneText(){
+    return mode==="hot" ? "Pour into a cup and enjoy."
+      : "Swirl the decanter to melt all the ice, then serve over fresh ice cubes.";
+  }
 
   /* ---- calculator ---- */
-  var lastGood={c:RC,w:RW};
-  function showRatio(){
+  var lastGood={c:15,w:273};
+  function sync(){
     var c=parseFloat(coffee.value), w=parseFloat(water.value);
-    if(c>0&&w>0){ratio.textContent="1 : "+(Math.round(w/c*10)/10);lastGood={c:c,w:w};}
-    renderSteps();
+    if(c>0&&w>0){lastGood={c:c,w:w};}
+    var g=lastGood;
+    var rt=Math.round(g.w/g.c*10)/10;
+    if(mode==="iced"){
+      ice.value=Math.round(g.w*M.iced.ice);
+      $("ratio").innerHTML='Coffee to water <b>1 : '+rt+'</b> &middot; water to ice <b>3 : 2</b>';
+    }else{
+      $("ratio").innerHTML='Ratio <b>1 : '+rt+'</b>';
+    }
+    var m=cfg();
+    $("reset").textContent="Reset to "+m.rc+" g / "+defWater(m.rc)+" g";
+    renderPrep(); renderSteps();
   }
   coffee.addEventListener("input",function(){
     var c=parseFloat(coffee.value);
-    if(c>0){water.value=Math.round(c*RW/RC);}
-    showRatio();
+    if(c>0){water.value=defWater(c);}
+    sync();
   });
   water.addEventListener("input",function(){
     var w=parseFloat(water.value);
-    if(w>0){coffee.value=r1(w*RC/RW);}
-    showRatio();
+    if(w>0){coffee.value=r1(w/cfg().kw);}
+    sync();
   });
-  $("reset").addEventListener("click",function(){coffee.value=RC;water.value=RW;showRatio();});
+  function loadDefaults(){
+    var m=cfg();
+    coffee.value=m.rc; water.value=defWater(m.rc);
+    lastGood={c:m.rc,w:defWater(m.rc)};
+    sync();
+  }
+  $("reset").addEventListener("click",loadDefaults);
 
   var chips=document.querySelectorAll(".chips button");
   chips.forEach(function(b){b.addEventListener("click",function(){
@@ -163,31 +206,57 @@ li.past{opacity:.55}
     $("temp").textContent=b.dataset.t; $("tempnote").textContent=b.dataset.n;
   });});
 
-  /* ---- steps list ---- */
+  /* ---- mode switch ---- */
+  function setMode(m){
+    if(running||m===mode)return;
+    mode=m;
+    $("m-hot").setAttribute("aria-pressed",m==="hot");
+    $("m-iced").setAttribute("aria-pressed",m==="iced");
+    $("calc").className="calc"+(m==="iced"?" iced":"");
+    $("icebox").hidden=m!=="iced";
+    resetTimer();
+    loadDefaults();
+    drawTicks();
+  }
+  $("m-hot").addEventListener("click",function(){setMode("hot")});
+  $("m-iced").addEventListener("click",function(){setMode("iced")});
+
+  /* ---- prep + steps ---- */
+  function renderPrep(){
+    var c=r1(lastGood.c), h="";
+    if(mode==="iced"){
+      h+="<li>Place <b>"+Math.round(lastGood.w*M.iced.ice)+"</b> g of ice cubes in your decanter.</li>";
+      h+="<li>Set the AeroPress in standard position on top of the decanter. No need to rinse the filter.</li>";
+      h+="<li>Boil your water, then weigh and grind <b>"+c+"</b> g of coffee (fine to medium, like table salt).</li>";
+      h+="<li>Put the coffee in the AeroPress and tap or shake to level the bed.</li>";
+    }else{
+      h+="<li>Put a paper filter in the cap and attach it. No rinse or preheat needed.</li>";
+      h+="<li>Add <b>"+c+"</b> g of coffee, ground fine to medium (like table salt), and level it.</li>";
+    }
+    $("prep").innerHTML=h;
+  }
   function renderSteps(){
-    var w=Math.round(lastGood.w), c=r1(lastGood.c);
-    document.querySelectorAll(".cg").forEach(function(e){e.textContent=c});
-    var h="";
-    PH.forEach(function(p,i){
-      h+='<li id="s'+i+'" style="--c:var('+p.cc+')"><span class="t">'+fmt(p.s)+'</span><div><strong>'+p.n+'</strong><p>'+p.t(w)+'</p></div></li>';
+    var h="", m=cfg();
+    phases().forEach(function(p,i){
+      h+='<li id="s'+i+'" style="--c:var('+p.cc+')"><span class="t">'+fmt(p.s)+'</span><div><strong>'+p.n+'</strong><p>'+p.t+'</p></div></li>';
     });
-    h+='<li id="s3" style="--c:var(--done)"><span class="t">'+fmt(TOTAL)+'</span><div><strong>Done</strong><p>Pour into a cup and enjoy.</p></div></li>';
+    h+='<li id="s3" style="--c:var(--done)"><span class="t">'+fmt(m.total)+'</span><div><strong>Done</strong><p>'+doneText()+'</p></div></li>';
     $("steps").innerHTML=h;
     mark(lastPhase);
   }
 
-  /* ---- ticks on dial (swirl at 2:00, press at 2:30) ---- */
-  (function(){
-    var g=$("ticks"), out="";
-    [120,150].forEach(function(s){
-      var a=s/TOTAL*2*Math.PI, x1=100+80*Math.cos(a), y1=100+80*Math.sin(a), x2=100+100*Math.cos(a), y2=100+100*Math.sin(a);
+  function drawTicks(){
+    var m=cfg(), out="";
+    [m.swirl,m.press].forEach(function(s){
+      var a=s/m.total*2*Math.PI, x1=100+80*Math.cos(a), y1=100+80*Math.sin(a), x2=100+100*Math.cos(a), y2=100+100*Math.sin(a);
       out+='<line class="tick" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>';
     });
-    g.innerHTML=out;
-  })();
+    $("ticks").innerHTML=out;
+  }
 
   /* ---- timer ---- */
   var running=false, elapsed=0, t0=0, iv=null, lastPhase=-1, audio=null, wake=null;
+  var READY="Add the coffee, then start the timer as you begin to pour.";
 
   function beep(f,d){
     try{
@@ -201,7 +270,6 @@ li.past{opacity:.55}
     }catch(e){}
     try{if(navigator.vibrate)navigator.vibrate(d>.3?[200,80,200]:120);}catch(e){}
   }
-
   function mark(i){
     for(var k=0;k<4;k++){
       var el=$("s"+k); if(!el)continue;
@@ -209,72 +277,64 @@ li.past{opacity:.55}
       el.classList.toggle("past",i>=0&&k<i);
     }
   }
-
   function phaseIndex(t){
-    if(t>=TOTAL)return 3;
-    for(var i=0;i<PH.length;i++){if(t<PH[i].e)return i;}
-    return 3;
+    var m=cfg();
+    if(t>=m.total)return 3;
+    return t<m.swirl?0:(t<m.press?1:2);
   }
-
   function paint(){
-    var t=Math.min(elapsed,TOTAL), i=phaseIndex(t);
+    var m=cfg(), t=Math.min(elapsed,m.total), i=phaseIndex(t), P=phases();
     timeEl.textContent=fmt(t);
-    prog.style.strokeDashoffset=C*(1-t/TOTAL);
-    var col=i===3?"var(--done)":PH[i].c;
+    prog.style.strokeDashoffset=C*(1-t/m.total);
+    var col=i===3?"var(--done)":"var("+P[i].cc+")";
     dial.style.setProperty("--phase",col); go.style.setProperty("--phase",col);
     if(i!==lastPhase){
-      var first=lastPhase===-1;
+      var first=lastPhase<0;
       lastPhase=i; mark(i);
-      if(i===3){phaseEl.textContent="Done";cue.textContent="Time’s up. Remove the brewer and pour.";}
-      else{phaseEl.textContent=PH[i].n;cue.textContent=PH[i].t(Math.round(lastGood.w));}
+      if(i===3){phaseEl.textContent="Done";cue.textContent="Time’s up. "+doneText();}
+      else{phaseEl.textContent=P[i].n;cue.textContent=P[i].t;}
       if(running&&!first)beep(i===3?880:660,i===3?.5:.25);
     }
   }
-
   function tick(){
     elapsed=(performance.now()-t0)/1000;
-    if(elapsed>=TOTAL){elapsed=TOTAL;paint();finish();return;}
+    if(elapsed>=cfg().total){elapsed=cfg().total;paint();finish();return;}
     paint();
   }
-
   function setLock(on){
     try{
       if(on&&navigator.wakeLock){navigator.wakeLock.request("screen").then(function(l){wake=l}).catch(function(){});}
       else if(!on&&wake){wake.release();wake=null;}
     }catch(e){}
   }
-
+  function lockInputs(on){
+    coffee.disabled=water.disabled=on;
+    $("m-hot").disabled=$("m-iced").disabled=on;
+    $("reset").disabled=on;
+  }
   function start(){
     running=true; t0=performance.now()-elapsed*1000;
-    go.textContent="Pause"; coffee.disabled=water.disabled=true;
+    go.textContent="Pause"; lockInputs(true);
     beep(660,.15); setLock(true);
     lastPhase=-2; iv=setInterval(tick,100); tick();
   }
-  function pause(){
-    running=false; clearInterval(iv); go.textContent="Resume"; setLock(false);
-  }
-  function finish(){
-    running=false; clearInterval(iv); go.textContent="Brew again"; setLock(false);
-    coffee.disabled=water.disabled=false;
-  }
-  function reset(){
-    running=false; clearInterval(iv); elapsed=0; lastPhase=-1; setLock(false);
-    coffee.disabled=water.disabled=false;
+  function pause(){running=false; clearInterval(iv); go.textContent="Resume"; setLock(false);}
+  function finish(){running=false; clearInterval(iv); go.textContent="Brew again"; setLock(false); lockInputs(false);}
+  function resetTimer(){
+    running=false; clearInterval(iv); elapsed=0; lastPhase=-1; setLock(false); lockInputs(false);
     go.textContent="Start"; timeEl.textContent="0:00"; phaseEl.textContent="Ready";
     prog.style.strokeDashoffset=C; dial.style.removeProperty("--phase"); go.style.removeProperty("--phase");
-    cue.textContent="Add the coffee, then start the timer as you begin to pour.";
-    mark(-1);
+    cue.textContent=READY; mark(-1);
   }
-
   go.addEventListener("click",function(){
     if(running)pause();
-    else if(elapsed>=TOTAL){reset();start();}
+    else if(elapsed>=cfg().total){resetTimer();start();}
     else start();
   });
-  $("stop").addEventListener("click",reset);
+  $("stop").addEventListener("click",resetTimer);
   document.addEventListener("visibilitychange",function(){if(running&&!document.hidden){setLock(true);tick();}});
 
-  showRatio();
+  drawTicks(); resetTimer(); sync();
 })();
 </script>
 </body>
